@@ -229,21 +229,21 @@ const CoffeeCorpTycoon: React.FC = () => {
 
   // ======= Data =======
   const BUILDING_DATA = [
-    {id:'kiosk',   name:'Koffiekar',        icon:'🛒', baseCost: 15,    baseRate: 0.5},
-    {id:'cart',    name:'Straatbarista',    icon:'☕', baseCost: 120,   baseRate: 3},
-    {id:'stand',   name:'Koffiekraam',      icon:'🧃', baseCost: 850,   baseRate: 12},
-    {id:'cafe',    name:'Café',             icon:'🏠', baseCost: 4200,  baseRate: 42},
-    {id:'truck',   name:'Foodtruck',        icon:'🚚', baseCost: 24000, baseRate: 210},
-    {id:'roast',   name:'Brandery',         icon:'🔥', baseCost: 125000,baseRate: 1100},
-    {id:'chain',   name:'Ketenwinkel',      icon:'🏢', baseCost: 700000,baseRate: 6400},
+    {id:'kiosk',   name:'Coffee Cart',       icon:'🛒', baseCost: 15,    baseRate: 0.5},
+    {id:'cart',    name:'Street Barista',    icon:'☕', baseCost: 120,   baseRate: 3},
+    {id:'stand',   name:'Coffee Stand',      icon:'🧃', baseCost: 850,   baseRate: 12},
+    {id:'cafe',    name:'Café',              icon:'🏠', baseCost: 4200,  baseRate: 42},
+    {id:'truck',   name:'Food Truck',        icon:'🚚', baseCost: 24000, baseRate: 210},
+    {id:'roast',   name:'Roastery',          icon:'🔥', baseCost: 125000,baseRate: 1100},
+    {id:'chain',   name:'Chain Store',       icon:'🏢', baseCost: 700000,baseRate: 6400},
   ];
 
   const UPGRADE_DATA = [
-    {id:'beans',   name:'Specialty bonen', desc:'+25% totale productie', cost: 2000, multiplierIncrease: 0.25},
-    {id:'milk',    name:'Melkschuim‑meesters', desc:'+25% totale productie', cost: 8500, multiplierIncrease: 0.25},
-    {id:'barista', name:'Barista‑training', desc:'+50% totale productie', cost: 35000, multiplierIncrease: 0.50},
-    {id:'app',     name:'Bestel‑app', desc:'+75% totale productie', cost: 160000, multiplierIncrease: 0.75},
-    {id:'solar',   name:'Zonnepanelen', desc:'Kosten -5% (alle aankopen)', cost: 90000, enablesCostReduction: 0.05},
+    {id:'beans',   name:'Specialty Beans', desc:'+25% total production', cost: 2000, multiplierIncrease: 0.25},
+    {id:'milk',    name:'Milk Foam Masters', desc:'+25% total production', cost: 8500, multiplierIncrease: 0.25},
+    {id:'barista', name:'Barista Training', desc:'+50% total production', cost: 35000, multiplierIncrease: 0.50},
+    {id:'app',     name:'Order App', desc:'+75% total production', cost: 160000, multiplierIncrease: 0.75},
+    {id:'solar',   name:'Solar Panels', desc:'Costs -5% (all purchases)', cost: 90000, enablesCostReduction: 0.05},
   ];
 
   // ======= Initialize Buildings and Upgrades =======
@@ -266,11 +266,11 @@ const CoffeeCorpTycoon: React.FC = () => {
     let event;
     
     if (roll < 0.5) {
-      event = {id:'rush', name:'Spitsuur', dur:12, boost:0.5, text:'Klantenstorm! Productie +50%'};
+      event = {id:'rush', name:'Rush Hour', dur:12, boost:0.5, text:'Customer storm! Production +50%'};
     } else if (roll < 0.8) {
-      event = {id:'promo', name:'Krantenactie', dur:18, boost:0.35, text:'Actie slaat aan! +35% productie'};
+      event = {id:'promo', name:'Press Feature', dur:18, boost:0.35, text:'Great press! +35% production'};
     } else {
-      event = {id:'inspect', name:'Inspectie', dur:8, boost:-0.25, text:'Hygiëne‑inspectie… ‑25% tijdelijk'};
+      event = {id:'inspect', name:'Inspection', dur:8, boost:-0.25, text:'Health inspection... -25% temporarily'};
     }
 
     setActiveEvent({...event, remaining: event.dur});
@@ -336,7 +336,7 @@ const CoffeeCorpTycoon: React.FC = () => {
     }));
 
     setActiveEvent(null);
-    showToast(`✨ Prestige! Je hebt <b>${pts}</b> merkpunt(en) verdiend.`);
+    showToast(`✨ Prestige! You earned <b>${pts}</b> brand point(s).`);
   };
 
   // ======= Save/Load Functions =======
@@ -353,7 +353,7 @@ const CoffeeCorpTycoon: React.FC = () => {
     
     // Using a state variable instead of localStorage
     window.tempSaveData = JSON.stringify(data);
-    showToast('💾 Opgeslagen');
+    showToast('💾 Saved');
   };
 
   const load = (): void => {
@@ -394,31 +394,31 @@ const CoffeeCorpTycoon: React.FC = () => {
         costReduction: data.costReduction || { active: false, pct: 0 }
       }));
 
-      showToast('✅ Save geladen');
+      showToast('✅ Save loaded');
     } catch (e) {
       console.error(e);
-      showToast('Kon save niet laden', 'bad');
+      showToast('Could not load save', 'bad');
     }
   };
 
   const exportSave = (): void => {
     const data = window.tempSaveData || '{}';
-    navigator.clipboard.writeText(data).then(() => showToast('📋 Export naar klembord'));
+    navigator.clipboard.writeText(data).then(() => showToast('📋 Exported to clipboard'));
   };
 
   const importSave = (): void => {
-    const s = prompt('Plak je save JSON:');
+    const s = prompt('Paste your save JSON:');
     if (!s) return;
     try {
       window.tempSaveData = s;
       load();
     } catch {
-      showToast('Ongeldige JSON', 'bad');
+      showToast('Invalid JSON', 'bad');
     }
   };
 
   const hardReset = (): void => {
-    if (confirm('Zeker weten? Dit zet ALLES terug.')) {
+    if (confirm('Are you sure? This will reset EVERYTHING.')) {
       window.tempSaveData = null;
       window.location.reload();
     }
@@ -495,7 +495,7 @@ const CoffeeCorpTycoon: React.FC = () => {
           };
         }
 
-        showToast(`✅ Upgrade gekocht: <b>${upgrade.name}</b>`, 'info');
+        showToast(`✅ Upgrade purchased: <b>${upgrade.name}</b>`, 'info');
         return newState;
       }
       return prev;
@@ -645,10 +645,10 @@ const CoffeeCorpTycoon: React.FC = () => {
       <header className="header">
         <div className="wrap row">
           <div className="brand">☕ Coffee Corp Tycoon</div>
-          <div className="pill"><small>Kas</small><b>{fmt(gameState.cash)}</b></div>
-          <div className="pill"><small>p/s</small><b>{fmt(totalRate)}</b></div>
-          <div className="pill"><small>Totaal verdiend</small><b>{fmt(gameState.totalEarned)}</b></div>
-          <div className="pill"><small>Merkpunten</small><b>{gameState.brandPoints}</b></div>
+          <div className="pill"><small>Cash</small><b>{fmt(gameState.cash)}</b></div>
+          <div className="pill"><small>$/s</small><b>{fmt(totalRate)}</b></div>
+          <div className="pill"><small>Total Earned</small><b>{fmt(gameState.totalEarned)}</b></div>
+          <div className="pill"><small>Brand Points</small><b>{gameState.brandPoints}</b></div>
           
           {activeEvent && (
             <span className={`badge ${activeEvent.boost > 0 ? 'good' : 'warn'}`}>
@@ -657,7 +657,7 @@ const CoffeeCorpTycoon: React.FC = () => {
           )}
           
           <div style={{marginLeft:'auto'}} className="row">
-            <button className="btn-secondary" onClick={save}>Opslaan</button>
+            <button className="btn-secondary" onClick={save}>Save</button>
             <button className="btn-secondary" onClick={exportSave}>Export</button>
             <button className="btn-secondary" onClick={importSave}>Import</button>
             <button className="btn-ghost danger" onClick={hardReset}>Reset</button>
@@ -667,30 +667,30 @@ const CoffeeCorpTycoon: React.FC = () => {
 
       <main className="main">
         <section className="panel">
-          <div className="title">Je bedrijf</div>
-          <div className="subtitle">Productie multiplier: x{productionMultiplier.toFixed(2)}</div>
+          <div className="title">Your Business</div>
+          <div className="subtitle">Production multiplier: x{productionMultiplier.toFixed(2)}</div>
           <div className="hr"></div>
           <div className="row" style={{gap:'8px'}}>
-            <button className="btn" onClick={handleClick}>Brouw koffie (+$1)</button>
+            <button className="btn" onClick={handleClick}>Brew Coffee (+$1)</button>
             <button className="btn-secondary" onClick={toggleBuyMax}>
-              {gameState.buyMax ? 'Koop 1' : 'Koop Max'}
+              {gameState.buyMax ? 'Buy 1' : 'Buy Max'}
             </button>
             <button className="btn-secondary" onClick={toggleSpeed}>
-              {gameState.speed === 2 ? 'Normaal' : 'Versnel 2×'}
+              {gameState.speed === 2 ? 'Normal' : 'Speed 2×'}
             </button>
           </div>
 
           <div className="hr"></div>
           <div className="title">Prestige</div>
-          <div className="subtitle">Ruil voortgang in voor <b>Merkpunten</b> om je productie blijvend te verhogen.</div>
+          <div className="subtitle">Trade progress for <b>Brand Points</b> to permanently increase your production.</div>
           <div className="row" style={{marginTop:'8px', gap:'8px'}}>
             <button className="btn" onClick={doPrestige} disabled={prestigePoints <= 0}>
-              Prestige voor <span>{prestigePoints}</span> punten
+              Prestige for <span>{prestigePoints}</span> points
             </button>
             <span className="badge">
               {prestigePoints > 0 
-                ? `Je krijgt ${prestigePoints} merkpunt(en). Prestigeren zet je kas en gebouwen terug.`
-                : `Verdien $50,000 totaal om prestige te ontgrendelen.`
+                ? `You'll get ${prestigePoints} brand point(s). Prestiging resets your cash and buildings.`
+                : `Earn $50,000 total to unlock prestige.`
               }
             </span>
           </div>
@@ -699,8 +699,8 @@ const CoffeeCorpTycoon: React.FC = () => {
         <section>
           <div className="card" style={{marginBottom:'12px'}}>
             <div className="row-split">
-              <div className="title">Vestigingen & Apparatuur</div>
-              <div className="subtitle">Investeer om passief inkomen te genereren</div>
+              <div className="title">Locations & Equipment</div>
+              <div className="subtitle">Invest to generate passive income</div>
             </div>
             <div className="grid">
               {gameState.buildings.map((building: Building) => {
@@ -713,7 +713,7 @@ const CoffeeCorpTycoon: React.FC = () => {
                       <div className="icon">{building.icon}</div>
                       <div style={{flex:1}}>
                         <h3>{building.name} <span className="muted">x{building.count}</span></h3>
-                        <div className="subtitle">Verdient <b>+{fmt(rate)}/s</b></div>
+                        <div className="subtitle">Earns <b>+{fmt(rate)}/s</b></div>
                         <div className="progress" style={{marginTop:'8px'}}>
                           <div className="bar" style={{width: pct(building.progress)}}></div>
                         </div>
@@ -725,7 +725,7 @@ const CoffeeCorpTycoon: React.FC = () => {
                         disabled={gameState.cash < cost}
                         onClick={() => buyBuilding(building.id, gameState.buyMax ? 'max' : 1)}
                       >
-                        Koop ( {fmt(cost)} )
+                        Buy ( {fmt(cost)} )
                       </button>
                       <button 
                         className="btn-secondary" 
@@ -750,7 +750,7 @@ const CoffeeCorpTycoon: React.FC = () => {
           <div className="card">
             <div className="row-split">
               <div className="title">Upgrades</div>
-              <div className="subtitle">Koop permanente verbeteringen</div>
+              <div className="subtitle">Buy permanent improvements</div>
             </div>
             <div className="grid">
               {gameState.upgrades.map((upgrade: Upgrade) => (
@@ -766,7 +766,7 @@ const CoffeeCorpTycoon: React.FC = () => {
                         disabled={upgrade.bought || gameState.cash < upgrade.cost}
                         onClick={() => buyUpgrade(upgrade.id)}
                       >
-                        {upgrade.bought ? 'Gekocht' : `Koop (${fmt(upgrade.cost)})`}
+                        {upgrade.bought ? 'Purchased' : `Buy (${fmt(upgrade.cost)})`}
                       </button>
                     </div>
                   </div>
@@ -788,7 +788,7 @@ const CoffeeCorpTycoon: React.FC = () => {
       />
       
       <div className="footer">
-        Gemaakt voor 1‑dag productie. Theming-tip: zoek in de code naar <span className="link">THEME</span> en pas icoontjes/namen aan.
+        Built for 1-day production. Theming tip: search the code for <span className="link">THEME</span> and customize icons/names.
       </div>
     </>
   );
