@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import AdUnit from "./src/AdUnit"; // ← toegevoegd voor de ad rails
 
 declare global {
   interface Window {
@@ -640,6 +641,19 @@ const CoffeeCorpTycoon: React.FC = () => {
         .link{color:#93c5fd; text-decoration:underline dotted}
         .danger{color:#fecaca}
         .hr{height:1px; background:rgba(148,163,184,.18); margin:10px 0}
+
+        /* === AD RAILS (toegevoegd) === */
+        .ad-rail {
+          position: fixed;
+          top: 90px;        /* pas aan als je header hoger/lager is */
+          width: 300px;     /* 300x600 skyscraper */
+          z-index: 20;
+        }
+        .ad-rail.left { left: 24px; }
+        .ad-rail.right { right: 24px; }
+        @media (max-width: 1400px) {
+          .ad-rail { display: none; } /* verberg op smallere schermen */
+        }
       `}</style>
 
       <header className="header">
@@ -664,6 +678,26 @@ const CoffeeCorpTycoon: React.FC = () => {
           </div>
         </div>
       </header>
+
+      {/* === AD RAILS (toegevoegd) === */}
+      <div className="ad-rail left">
+        <AdUnit 
+          slot="2553351346"
+          style={{ display: "block" }}
+          format="auto"
+          responsive="true"
+        />
+      </div>
+
+      <div className="ad-rail right">
+      <AdUnit 
+        slot="5422787760" // RightRail
+        style={{ display: "block" }}
+        format="auto"
+        responsive="true"
+      />
+      </div>
+      {/* === EINDE AD RAILS === */}
 
       <main className="main">
         <section className="panel">
