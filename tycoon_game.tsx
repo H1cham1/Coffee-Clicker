@@ -560,6 +560,20 @@ const CoffeeCorpTycoon: React.FC = () => {
     load();
   }, []);
 
+  // === AdSense Auto ads ===
+  useEffect(() => {
+    // voorkom dubbel toevoegen
+    if (document.querySelector('script[data-adsbygoogle-client="ca-pub-2801367195007587"]')) return;
+
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2801367195007587";
+    s.setAttribute("data-adsbygoogle-client", "ca-pub-2801367195007587");
+    s.crossOrigin = "anonymous";
+    document.head.appendChild(s);
+  }, []);
+
+
   // ======= Computed Values =======
   const totalRate = gameState.buildings.reduce((a: number, b: Building) => a + b.getRate(gameState.multipliers, gameState.brandPoints), 0);
   const prestigePoints = prestigePointsFor(gameState.totalEarned);
