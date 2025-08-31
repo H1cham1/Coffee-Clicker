@@ -308,7 +308,7 @@ const CoffeeCorpTycoon: React.FC = () => {
 
   // ======= Prestige System =======
   const prestigePointsFor = (totalEarned: number): number => {
-    return Math.floor(Math.pow(totalEarned/50000, 0.7));
+    return Math.floor(Math.pow(totalEarned/500000, 0.7));
   };
 
   const doPrestige = (): void => {
@@ -690,7 +690,7 @@ const CoffeeCorpTycoon: React.FC = () => {
             <span className="badge">
               {prestigePoints > 0 
                 ? `You'll get ${prestigePoints} brand point(s). Prestiging resets your cash and buildings.`
-                : `Earn $50,000 total to unlock prestige.`
+                : `Earn $500,000 total to unlock prestige.`
               }
             </span>
           </div>
