@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coffee Corp Tycoon — 1‑Day Edition</title>
+  <style>
+    :root{
+      --bg:#0f172a;         /* slate-900 */
+      --panel:#111827;      /* gray-900 */
+      --card:#1f2937;       /* gray-800 */
+      --muted:#94a3b8;      /* slate-400 */
+      --text:#e5e7eb;       /* gray-200 */
+      --accent:#22c55e;     /* green-500 */
+      --accent-2:#38bdf8;   /* sky-400 */
+      --danger:#ef4444;     /* red-500 */
+      --warn:#f59e0b;       /* amber-500 */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:linear-gradient(180deg, #0b1024, #0f172a); color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    header{
+      position:sticky; top:0; z-index:30; backdrop-filter:saturate(140%) blur(8px);
+      background:rgba(15,23,42,.85); border-bottom:1px solid rgba(148,163,184,.15);
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:14px 16px}
+    .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+    .brand{font-weight:800; letter-spacing:.3px}
+    .pill{padding:6px 10px; border:1px solid rgba(148,163,184,.2); border-radius:999px; display:inline-flex; gap:8px; align-items:center}
+    .pill small{color:var(--muted)}
+    .kpi{display:flex; gap:10px; align-items:baseline}
+    .kpi b{font-size:18px}
+    .kpi small{color:var(--muted)}
+
+    main{max-width:1100px; margin:18px auto; padding:0 16px; display:grid; grid-template-columns: 320px 1fr; gap:16px}
+    @media (max-width: 900px){ main{grid-template-columns: 1fr} }
+
+    .panel{background:var(--panel); border:1px solid rgba(148,163,184,.15); border-radius:16px; padding:14px}
+    .card{background:var(--card); border:1px solid rgba(148,163,184,.12); border-radius:16px; padding:14px}
+    .title{font-weight:700; font-size:14px; letter-spacing:.25px; color:#cbd5e1; margin-bottom:10px}
+    .subtitle{color:var(--muted); font-size:12px}
+
+    .grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:12px}
+
+    button{cursor:pointer; border:0; padding:10px 12px; border-radius:12px; font-weight:700}
+    .btn{background:var(--accent); color:#052e16}
+    .btn:disabled{opacity:.5; cursor:not-allowed}
+    .btn-secondary{background:#0b1227; color:#d1d5db; border:1px solid rgba(148,163,184,.25)}
+    .btn-ghost{background:transparent; color:#cbd5e1; border:1px dashed rgba(148,163,184,.35)}
+
+    .building{display:flex; gap:12px}
+    .building .icon{font-size:22px}
+    .building h3{margin:0; font-size:15px}
+    .muted{color:var(--muted)}
+
+    .progress{height:8px; background:rgba(148,163,184,.2); border-radius:999px; overflow:hidden}
+    .bar{height:100%; background:var(--accent-2); width:0%}
+
+    .row-split{display:flex; justify-content:space-between; align-items:center}
+
+    .toast{
+      position: fixed; right:16px; bottom:16px; min-width:260px; max-width:340px; padding:12px 14px;
+      border-radius:14px; background:rgba(15,23,42,.95); border:1px solid rgba(148,163,184,.25);
+      box-shadow:0 10px 24px rgba(0,0,0,.35); display:none
+    }
+    .toast.show{display:block; animation:pop .2s ease-out}
+    @keyframes pop{ from{ transform:translateY(8px); opacity:0 } to{ transform:translateY(0); opacity:1 } }
+
+    .badge{display:inline-flex; gap:6px; align-items:center; font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid rgba(148,163,184,.25); color:#cbd5e1}
+    .badge.warn{border-color:rgba(245,158,11,.45); color:#fde68a}
+    .badge.good{border-color:rgba(34,197,94,.45); color:#bbf7d0}
+
+    .footer{color:var(--muted); font-size:12px; text-align:center; padding:18px}
+    .link{color:#93c5fd; text-decoration:underline dotted}
+    .danger{color:#fecaca}
+    .hr{height:1px; background:rgba(148,163,184,.18); margin:10px 0}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap row">
+      <div class="brand">☕ Coffee Corp Tycoon</div>
+      <div class="pill"><small>Kas</small><b id="cash">$0</b></div>
+      <div class="pill"><small>p/s</small><b id="pps">$0</b></div>
+      <div class="pill"><small>Totaal verdiend</small><b id="earned">$0</b></div>
+      <div class="pill"><small>Merkpunten</small><b id="brandPoints">0</b></div>
+      <span class="badge good" id="eventBadge" style="display:none"></span>
+      <div style="margin-left:auto" class="row">
+        <button class="btn-secondary" id="saveBtn">Opslaan</button>
+        <button class="btn-secondary" id="exportBtn">Export</button>
+        <button class="btn-secondary" id="importBtn">Import</button>
+        <button class="btn-ghost danger" id="resetBtn">Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="title">Je bedrijf</div>
+      <div class="subtitle" id="multiplierText">Productie multiplier: x1.00</div>
+      <div class="hr"></div>
+      <div class="row" style="gap:8px">
+        <button class="btn" id="clicker">Brouw koffie (+$1)</button>
+        <button class="btn-secondary" id="buyMax">Koop Max</button>
+        <button class="btn-secondary" id="toggleTick">Versnel 2×</button>
+      </div>
+
+      <div class="hr"></div>
+      <div class="title">Prestige</div>
+      <div class="subtitle">Ruil voortgang in voor <b>Merkpunten</b> om je productie blijvend te verhogen.</div>
+      <div class="row" style="margin-top:8px; gap:8px">
+        <button class="btn" id="prestigeBtn" disabled>Prestige voor <span id="ppCalc">0</span> punten</button>
+        <span class="badge" id="nextPrestige">Verdien $50,000 totaal om prestige te ontgrendelen.</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="card" style="margin-bottom:12px">
+        <div class="row-split">
+          <div class="title">Vestigingen & Apparatuur</div>
+          <div class="subtitle">Investeer om passief inkomen te genereren</div>
+        </div>
+        <div class="grid" id="buildings"></div>
+      </div>
+
+      <div class="card">
+        <div class="row-split">
+          <div class="title">Upgrades</div>
+          <div class="subtitle">Koop permanente verbeteringen</div>
+        </div>
+        <div class="grid" id="upgrades"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <div class="footer">Gemaakt voor 1‑dag productie. Theming-tip: zoek in de code naar <span class="link">THEME</span> en pas icoontjes/namen aan.</div>
+
+  <script>
+  // ======= Utility =======
+  const fmt = (n) => {
+    if (!isFinite(n)) return "$∞";
+    const neg = n < 0; n = Math.abs(n);
+    const units = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi'];
+    let i = 0; while (n >= 1000 && i < units.length - 1) { n /= 1000; i++; }
+    return (neg?'-':'') + '$' + (n >= 100 ? n.toFixed(0) : n >= 10 ? n.toFixed(1) : n.toFixed(2)) + units[i];
+  };
+  const pct = (n) => (n*100).toFixed(0) + '%';
+  const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+
+  function toast(msg, kind='info'){
+    const el = document.getElementById('toast');
+    el.innerHTML = msg;
+    el.style.borderColor = kind==='warn'? 'rgba(245,158,11,.55)': kind==='bad'? 'rgba(239,68,68,.55)': 'rgba(148,163,184,.35)';
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'), 3500);
+  }
+
+  // ======= Core Game State =======
+  const SAVE_KEY = 'coffee-corp-tycoon-v1';
+  const TICK_MS_BASE = 250; // 4 ticks/sec
+
+  const GAME = {
+    cash: 0,
+    totalEarned: 0,
+    brandPoints: 0,
+    buildings: [],
+    upgrades: [],
+    // dynamic multipliers
+    multipliers: {
+      production: 0,    // +0.25 => +25%
+      eventBoost: 0,    // temporary
+    },
+    speed: 1,
+    buyMax: false,
+  };
+
+  // ======= THEME: Buildings =======
+  class Building{
+    constructor({id, name, icon, baseCost, baseRate}){
+      this.id=id; this.name=name; this.icon=icon; this.baseCost=baseCost; this.baseRate=baseRate; this.count=0;
+      this.el=null; this.prog=0; // progress visual
+    }
+    get cost(){ return Math.ceil(this.baseCost * Math.pow(1.15, this.count)); }
+    get ratePerUnit(){ return this.baseRate * (1 + GAME.multipliers.production + GAME.multipliers.eventBoost) * (1 + GAME.brandPoints*0.1); }
+    get rate(){ return this.count * this.ratePerUnit; }
+    tick(dt){
+      // Visual progress bar toward $1 payout chunk per building-rate
+      const perSec = this.rate; // $/sec
+      const perTick = perSec * dt; // assume dt in seconds
+      GAME.cash += perTick; GAME.totalEarned += perTick;
+      // simple progress animation
+      this.prog = (this.prog + clamp(perTick/Math.max(1, this.count*5), 0, .4)) % 1; // purely visual
+      if(this.el){ this.el.querySelector('.rate').textContent = `+${fmt(this.rate)}/s`;
+                   const bar = this.el.querySelector('.bar'); if(bar) bar.style.width = pct(this.prog);
+                   const btn = this.el.querySelector('button'); btn.disabled = GAME.cash < this.cost;
+                   this.el.querySelector('.cost').textContent = fmt(this.cost);
+                   this.el.querySelector('.owned').textContent = 'x'+this.count;
+                 }
+    }
+    buy(n=1){
+      let bought=0; while (bought<n && GAME.cash >= this.cost){ GAME.cash -= this.cost; this.count++; bought++; }
+      return bought;
+    }
+    buyMax(){
+      let b=0; while(GAME.cash >= this.cost){ GAME.cash -= this.cost; this.count++; b++; }
+      return b;
+    }
+  }
+
+  // ======= THEME: Upgrades =======
+  class Upgrade{
+    constructor({id, name, desc, cost, apply}){
+      this.id=id; this.name=name; this.desc=desc; this.cost=cost; this.apply=apply; this.bought=false; this.el=null;
+    }
+    canBuy(){ return !this.bought && GAME.cash >= this.cost; }
+    buy(){ if(this.canBuy()){ GAME.cash -= this.cost; this.bought=true; this.apply(); return true } return false }
+  }
+
+  // ======= Content =======
+  const BUILDING_DATA = [
+    {id:'kiosk',   name:'Koffiekar',        icon:'🛒', baseCost: 15,    baseRate: 0.5},
+    {id:'cart',    name:'Straatbarista',    icon:'☕', baseCost: 120,   baseRate: 3},
+    {id:'stand',   name:'Koffiekraam',      icon:'🧃', baseCost: 850,   baseRate: 12},
+    {id:'cafe',    name:'Café',             icon:'🏠', baseCost: 4200,  baseRate: 42},
+    {id:'truck',   name:'Foodtruck',        icon:'🚚', baseCost: 24000, baseRate: 210},
+    {id:'roast',   name:'Brandery',         icon:'🔥', baseCost: 125000,baseRate: 1100},
+    {id:'chain',   name:'Ketenwinkel',      icon:'🏢', baseCost: 700000,baseRate: 6400},
+  ];
+
+  const UPGRADE_DATA = [
+    {id:'beans',   name:'Specialty bonen', desc:'+25% totale productie', cost: 2000, apply:()=> GAME.multipliers.production += 0.25},
+    {id:'milk',    name:'Melkschuim‑meesters', desc:'+25% totale productie', cost: 8500, apply:()=> GAME.multipliers.production += 0.25},
+    {id:'barista', name:'Barista‑training', desc:'+50% totale productie', cost: 35000, apply:()=> GAME.multipliers.production += 0.50},
+    {id:'app',     name:'Bestel‑app', desc:'+75% totale productie', cost: 160000, apply:()=> GAME.multipliers.production += 0.75},
+    {id:'solar',   name:'Zonnepanelen', desc:'Kosten -5% (alle aankopen)', cost: 90000, apply:()=> costReducer.enable(0.05)},
+  ];
+
+  const costReducer = { active:false, pct:0, enable(p){ this.active=true; this.pct=p; patchCost(); } };
+  function patchCost(){
+    // Monkey-patch cost getter with discount, once
+    if(!costReducer.active) return;
+    for(const b of GAME.buildings){
+      Object.defineProperty(b, 'cost', { get(){
+        const raw = Math.ceil(b.baseCost * Math.pow(1.15, b.count));
+        return Math.max(1, Math.floor(raw * (1 - costReducer.pct)));
+      }});
+    }
+  }
+
+  // ======= Events =======
+  const Events = {
+    active:null,
+    timer:0,
+    scheduleNext(){ this.timer = 5 + Math.random()*15; }, // next in 5–20 sec (demo pacing)
+    startRandom(){
+      const roll = Math.random();
+      if(roll < .5){ this.start({id:'rush', name:'Spitsuur', dur:12, boost:0.5, text:'Klantenstorm! Productie +50%'}); }
+      else if(roll < .8){ this.start({id:'promo', name:'Krantenactie', dur:18, boost:0.35, text:'Actie slaat aan! +35% productie'}); }
+      else { this.start({id:'inspect', name:'Inspectie', dur:8, boost:-0.25, text:'Hygiëne‑inspectie… ‑25% tijdelijk'}); }
+    },
+    start(e){
+      this.active = {...e, remaining:e.dur};
+      GAME.multipliers.eventBoost += e.boost;
+      badge(e);
+      toast(`📰 <b>${e.name}</b> — ${e.text}` , e.boost<0? 'warn':'info');
+    },
+    end(){ if(!this.active) return; GAME.multipliers.eventBoost -= this.active.boost; this.active=null; badge(null); },
+    tick(dt){
+      if(this.active){ this.active.remaining -= dt; if(this.active.remaining<=0){ this.end(); this.scheduleNext(); } else { badge(this.active); } }
+      else { this.timer -= dt; if(this.timer<=0){ this.startRandom(); } }
+    }
+  };
+  function badge(e){
+    const el = document.getElementById('eventBadge');
+    if(!e){ el.style.display='none'; return; }
+    el.style.display='inline-flex';
+    el.textContent = `${e.name} ${e.boost>0?'+':''}${Math.round(e.boost*100)}% · ${Math.ceil(e.remaining)}s`;
+  }
+
+  // ======= Prestige =======
+  function prestigePointsFor(totalEarned){
+    return Math.floor(Math.pow(totalEarned/50000, 0.7)); // gentle curve
+  }
+  function updatePrestigeUI(){
+    const pts = prestigePointsFor(GAME.totalEarned);
+    const btn = document.getElementById('prestigeBtn');
+    document.getElementById('ppCalc').textContent = pts;
+    btn.disabled = pts <= 0;
+    document.getElementById('nextPrestige').textContent = pts>0 ? `Je krijgt ${pts} merkpunt(en). Prestigeren zet je kas en gebouwen terug.` : `Verdien $50,000 totaal om prestige te ontgrendelen.`;
+  }
+  function doPrestige(){
+    const pts = prestigePointsFor(GAME.totalEarned);
+    if(pts<=0) return;
+    GAME.brandPoints += pts;
+    // reset soft
+    GAME.cash = 0; GAME.totalEarned = 0;
+    GAME.multipliers.production = 0; GAME.multipliers.eventBoost = 0;
+    for(const b of GAME.buildings){ b.count=0; }
+    for(const u of GAME.upgrades){ u.bought=false; }
+    renderUpgrades(); renderBuildings();
+    toast(`✨ Prestige! Je hebt <b>${pts}</b> merkpunt(en) verdiend.`);
+  }
+
+  // ======= Render =======
+  function renderBuildings(){
+    const grid = document.getElementById('buildings'); grid.innerHTML='';
+    GAME.buildings.forEach(b=>{
+      const card = document.createElement('div'); card.className='card';
+      card.innerHTML = `
+        <div class="building">
+          <div class="icon">${b.icon}</div>
+          <div style="flex:1">
+            <h3>${b.name} <span class="muted owned">x${b.count}</span></h3>
+            <div class="subtitle">Verdient <b class="rate">+${fmt(b.rate)}/s</b></div>
+            <div class="progress" style="margin-top:8px"><div class="bar"></div></div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px; gap:8px">
+          <button class="btn buyOne">Koop ( <span class="cost">${fmt(b.cost)}</span> )</button>
+          <button class="btn-secondary buyFive">+5</button>
+          <button class="btn-secondary buyMaxBtn">Max</button>
+        </div>
+      `;
+      card.querySelector('.buyOne').onclick = ()=>{ b.buy(1); };
+      card.querySelector('.buyFive').onclick = ()=>{ b.buy(5); };
+      card.querySelector('.buyMaxBtn').onclick = ()=>{ b.buyMax(); };
+      b.el = card; grid.appendChild(card);
+    });
+  }
+
+  function renderUpgrades(){
+    const grid = document.getElementById('upgrades'); grid.innerHTML='';
+    GAME.upgrades.forEach(u=>{
+      const card = document.createElement('div'); card.className='card'; card.style.opacity = u.bought? .55:1;
+      card.innerHTML = `
+        <div class="row-split">
+          <div>
+            <div class="title" style="margin:0 0 6px 0">${u.name}</div>
+            <div class="subtitle">${u.desc}</div>
+          </div>
+          <div>
+            <button class="${u.bought?'btn-ghost':'btn'}" ${u.bought? 'disabled': ''}>${u.bought? 'Gekocht':'Koop ' + '('+fmt(u.cost)+')'}</button>
+          </div>
+        </div>`;
+      card.querySelector('button').onclick = ()=>{ if(u.buy()){ renderUpgrades(); toast(`✅ Upgrade gekocht: <b>${u.name}</b>`,'info'); } };
+      u.el = card; grid.appendChild(card);
+    });
+  }
+
+  function renderStats(){
+    document.getElementById('cash').textContent = fmt(GAME.cash);
+    const pps = GAME.buildings.reduce((a,b)=> a + b.rate, 0);
+    document.getElementById('pps').textContent = fmt(pps);
+    document.getElementById('earned').textContent = fmt(GAME.totalEarned);
+    document.getElementById('brandPoints').textContent = GAME.brandPoints;
+    document.getElementById('multiplierText').textContent = `Productie multiplier: x${(1 + GAME.multipliers.production + GAME.multipliers.eventBoost + GAME.brandPoints*0.1).toFixed(2)}`;
+  }
+
+  // ======= Save / Load =======
+  function save(){
+    const data = {
+      cash: GAME.cash, totalEarned: GAME.totalEarned, brandPoints: GAME.brandPoints,
+      multipliers: { production: GAME.multipliers.production },
+      buildings: GAME.buildings.map(b=>({id:b.id,count:b.count})),
+      upgrades: GAME.upgrades.map(u=>({id:u.id,bought:u.bought})),
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    toast('💾 Opgeslagen');
+  }
+  function load(){
+    const raw = localStorage.getItem(SAVE_KEY); if(!raw) return;
+    try{
+      const data = JSON.parse(raw);
+      GAME.cash = data.cash||0; GAME.totalEarned = data.totalEarned||0; GAME.brandPoints=data.brandPoints||0;
+      GAME.multipliers.production = data.multipliers?.production||0;
+      for(const b of GAME.buildings){ const s = data.buildings?.find(x=>x.id===b.id); if(s) b.count = s.count||0; }
+      for(const u of GAME.upgrades){ const s = data.upgrades?.find(x=>x.id===u.id); if(s) u.bought = !!s.bought; if(u.bought) u.apply = (()=>{}); }
+      patchCost();
+      renderBuildings(); renderUpgrades();
+      toast('✅ Save geladen');
+    }catch(e){ console.error(e); toast('Kon save niet laden','bad'); }
+  }
+
+  function exportSave(){
+    const data = localStorage.getItem(SAVE_KEY) || '{}';
+    navigator.clipboard.writeText(data).then(()=> toast('📋 Export naar klembord'));
+  }
+  function importSave(){
+    const s = prompt('Plak je save JSON:'); if(!s) return; try{ localStorage.setItem(SAVE_KEY,s); load(); }catch{ toast('Ongeldige JSON','bad'); }
+  }
+  function hardReset(){ if(confirm('Zeker weten? Dit zet ALLES terug.')){ localStorage.removeItem(SAVE_KEY); location.reload(); } }
+
+  // ======= Main Loop =======
+  let TICK_MS = TICK_MS_BASE; let last = performance.now();
+  function loop(now){
+    const dt = (now - last)/1000 * GAME.speed; last = now;
+    for(const b of GAME.buildings){ b.tick(dt); }
+    Events.tick(dt);
+    renderStats(); updatePrestigeUI();
+    requestAnimationFrame(loop);
+  }
+
+  // ======= Bootstrap =======
+  function init(){
+    GAME.buildings = BUILDING_DATA.map(cfg => new Building(cfg));
+    GAME.upgrades = UPGRADE_DATA.map(cfg => new Upgrade(cfg));
+    patchCost();
+    renderBuildings(); renderUpgrades();
+
+    document.getElementById('clicker').onclick = ()=>{ const gain = 1 * (1 + GAME.multipliers.production + GAME.multipliers.eventBoost + GAME.brandPoints*0.1); GAME.cash += gain; GAME.totalEarned += gain; };
+    document.getElementById('buyMax').onclick = ()=>{ GAME.buyMax = !GAME.buyMax; document.getElementById('buyMax').textContent = GAME.buyMax? 'Koop 1' : 'Koop Max'; };
+    document.getElementById('toggleTick').onclick = ()=>{ GAME.speed = GAME.speed===1?2:1; document.getElementById('toggleTick').textContent = GAME.speed===2? 'Normaal' : 'Versnel 2×'; };
+
+    document.getElementById('prestigeBtn').onclick = doPrestige;
+
+    document.getElementById('saveBtn').onclick = save;
+    document.getElementById('exportBtn').onclick = exportSave;
+    document.getElementById('importBtn').onclick = importSave;
+    document.getElementById('resetBtn').onclick = hardReset;
+
+    // Auto-save
+    setInterval(save, 10000);
+
+    load();
+    Events.scheduleNext();
+    requestAnimationFrame(loop);
+  }
+
+  // Kick off
+  init();
+
+  </script>
+</body>
+</html>
